@@ -61,7 +61,7 @@ Two models were trained and compared on precision, recall, and F1-score, not jus
 ## Running locally
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/placement-predictor.git
+git clone https://github.com/Smrithiraj27/placement-predictor.git
 cd placement-predictor
 pip install -r requirements.txt
 python app.py
