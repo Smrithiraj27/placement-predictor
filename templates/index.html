@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Placement Predictor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f5f7;
+            margin: 0;
+            padding: 40px 16px;
+        }
+        .card {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #e2e2e2;
+            border-radius: 12px;
+            padding: 28px 32px;
+        }
+        h1 {
+            font-size: 20px;
+            margin: 0 0 4px;
+            color: #1a1a1a;
+        }
+        .subtitle {
+            font-size: 13px;
+            color: #777;
+            margin: 0 0 24px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: #fff;
+        }
+        .hint {
+            font-size: 11px;
+            color: #999;
+            font-weight: 400;
+        }
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover { background: #439a45; }
+        .result {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .result-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+        .result-label {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .confidence-text {
+            font-size: 13px;
+            color: #777;
+        }
+        .bar-track {
+            height: 6px;
+            background: #eee;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            background: #4CAF50;
+        }
+        .bar-fill.not-placed { background: #d9534f; }
+        .factors-title {
+            font-size: 13px;
+            color: #777;
+            margin: 16px 0 6px;
+        }
+        ul.factors {
+            font-size: 13px;
+            margin: 0;
+            padding-left: 18px;
+            color: #333;
+        }
+        ul.factors li { margin-bottom: 3px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Placement Predictor</h1>
+        <p class="subtitle">MBA campus placement likelihood, based on academic record</p>
+
+        <form action="/predict" method="post">
+            <div class="grid">
+                <div>
+                    <label>Gender</label>
+                    <select name="gender">
+                        <option value="F">Female</option>
+                        <option value="M">Male</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Work Experience</label>
+                    <select name="workex">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>10th Grade %</label>
+                    <input type="number" step="0.01" name="ssc_p" required>
+                </div>
+                <div>
+                    <label>10th Board</label>
+                    <select name="ssc_b">
+                        <option value="Central">Central</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>12th Grade %</label>
+                    <input type="number" step="0.01" name="hsc_p" required>
+                </div>
+                <div>
+                    <label>12th Board</label>
+                    <select name="hsc_b">
+                        <option value="Central">Central</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>12th Stream</label>
+                    <select name="hsc_s">
+                        <option value="Science">Science</option>
+                        <option value="Commerce">Commerce</option>
+                        <option value="Arts">Arts</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Degree Type</label>
+                    <select name="degree_t">
+                        <option value="Sci&Tech">Science & Tech</option>
+                        <option value="Comm&Mgmt">Commerce & Mgmt</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Degree %</label>
+                    <input type="number" step="0.01" name="degree_p" required>
+                </div>
+                <div>
+                    <label>Employability Test % <span class="hint">(optional)</span></label>
+                    <input type="number" step="0.01" name="etest_p" placeholder="Leave blank for average">
+                </div>
+
+                <div>
+                    <label>MBA Specialisation</label>
+                    <select name="specialisation">
+                        <option value="Mkt&Fin">Marketing & Finance</option>
+                        <option value="Mkt&HR">Marketing & HR</option>
+                    </select>
+                </div>
+                <div>
+                    <label>MBA % <span class="hint">(optional)</span></label>
+                    <input type="number" step="0.01" name="mba_p" placeholder="Leave blank for average">
+                </div>
+            </div>
+
+            <button type="submit">Predict Placement</button>
+        </form>
+
+        {% if prediction_text %}
+        <div class="result">
+            <div class="result-header">
+                <span class="result-label">{{ prediction_text }}</span>
+                <span class="confidence-text">confidence {{ confidence }}%</span>
+            </div>
+            <div class="bar-track">
+                <div class="bar-fill {% if 'Not' in prediction_text %}not-placed{% endif %}" style="width: {{ confidence }}%;"></div>
+            </div>
+            <p class="factors-title">Top factors</p>
+            <ul class="factors">
+                {% for point in explanation %}
+                <li>{{ point }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
